@@ -7,10 +7,10 @@ export default function Navbar() {
 
   if (!user) return null;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
+const handleLogout = async () => {
+  await logout();
+  navigate('/login');
+};
 
   const isAdmin = user.role === 'ROLE_ADMIN';
 

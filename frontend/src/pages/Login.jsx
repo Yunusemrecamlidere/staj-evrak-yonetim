@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -15,10 +15,16 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
-      const data = await login(email, password);
+      const data = await login(username, password);
       navigate(data.role === 'ROLE_ADMIN' ? '/admin' : '/student');
     } catch (err) {
-      setError(err.response?.data?.message || 'Giriş başarısız.');
+      if (!err.response) {
+        setError('Sunucuya ulaşılamıyor. Lütfen daha sonra tekrar deneyin.');
+      } else if (err.response.status === 423) {
+        setError(err.response.data?.message || 'Hesabınız 5 hatalı deneme nedeniyle kilitlendi.');
+      } else {
+        setError(err.response.data?.message || 'Giriş başarısız.');
+      }
     } finally {
       setLoading(false);
     }
@@ -30,11 +36,11 @@ export default function Login() {
       <form onSubmit={handleSubmit}>
         {error && <div className="alert alert-danger">{error}</div>}
         <input
-          type="email"
+          type="text"
           className="form-control mb-3"
-          placeholder="E-posta"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Kullanıcı adı veya e-posta"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
         />
         <input

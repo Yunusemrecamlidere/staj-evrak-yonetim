@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
+import AdminTabs from '../../components/AdminTabs';
 import { MOCK_ALL_DOCS } from '../../mock/documents';
 // import api from '../../api/axios';
 
@@ -27,6 +29,7 @@ export default function AdminApplications() {
 
   return (
     <div className="container my-4">
+      <AdminTabs />
       <h3 className="mb-3">Tüm Başvurular</h3>
       {error && <div className="alert alert-danger">{error}</div>}
 
@@ -43,6 +46,7 @@ export default function AdminApplications() {
               <th>Dosya</th>
               <th>Yüklenme Tarihi</th>
               <th>Durum</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -53,6 +57,14 @@ export default function AdminApplications() {
                 <td>{d.fileName}</td>
                 <td>{d.uploadedAt}</td>
                 <td><StatusBadge status={d.status} /></td>
+                <td className="text-end">
+                  <Link
+                    to={`/admin/documents/${d.id}`}
+                    className="btn btn-outline-primary btn-sm"
+                  >
+                    İncele
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>

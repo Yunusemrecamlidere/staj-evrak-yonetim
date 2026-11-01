@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import StatusBadge from '../../components/StatusBadge';
+import AdminTabs from '../../components/AdminTabs';
 import { MOCK_ALL_DOCS } from '../../mock/documents';
 // import api from '../../api/axios';
 
@@ -8,13 +10,14 @@ const STATUSES = ['YUKLENDI', 'INCELENIYOR', 'HATALI', 'ONAYLANDI', 'TAMAMLANDI'
 export default function AdminCompleted() {
   const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null); // düzenlenen belge
+  const [editing, setEditing] = useState(null);
   const [newStatus, setNewStatus] = useState('');
 
   useEffect(() => {
     const load = async () => {
       // Backend hazır olunca:
       // const { data } = await api.get('/admin/documents?status=TAMAMLANDI');
+      // setDocs(data);
       await new Promise((r) => setTimeout(r, 400));
       setDocs(MOCK_ALL_DOCS.filter((d) => d.status === 'TAMAMLANDI'));
       setLoading(false);
@@ -38,7 +41,6 @@ export default function AdminCompleted() {
     if (newStatus === 'TAMAMLANDI') {
       setDocs(docs.map((d) => (d.id === editing.id ? { ...d, status: newStatus } : d)));
     } else {
-      // Statü değişti, artık Tamamlandı listesinde değil
       setDocs(docs.filter((d) => d.id !== editing.id));
     }
     setEditing(null);
@@ -46,6 +48,7 @@ export default function AdminCompleted() {
 
   return (
     <div className="container my-4">
+      <AdminTabs />
       <h3 className="mb-3">Tamamlanan Başvurular</h3>
 
       {loading ? (
@@ -73,6 +76,12 @@ export default function AdminCompleted() {
                 <td>{d.uploadedAt}</td>
                 <td><StatusBadge status={d.status} /></td>
                 <td className="text-end">
+                  <Link
+                    to={`/admin/documents/${d.id}`}
+                    className="btn btn-outline-primary btn-sm me-2"
+                  >
+                    İncele
+                  </Link>
                   <button
                     className="btn btn-outline-secondary btn-sm me-2"
                     onClick={() => openEdit(d)}

@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+// import api from '../../api/axios';
 
 const ALLOWED = ['doc', 'docx', 'pdf', 'jpg', 'jpeg', 'png'];
 const DAYS = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma'];
@@ -22,33 +24,34 @@ const emptyForm = {
 };
 
 export default function UploadDocument() {
+  const navigate = useNavigate();
   const [form, setForm] = useState(emptyForm);
   const [days, setDays] = useState([]);
   const [file, setFile] = useState(null);
   const [fileError, setFileError] = useState('');
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
+
   const formatPhone = (value) => {
-  let digits = value.replace(/\D/g, '');
-  if (digits.startsWith('90')) digits = digits.slice(2);
-  else if (digits.startsWith('0')) digits = digits.slice(1);
-  digits = digits.slice(0, 10);
+    let digits = value.replace(/\D/g, '');
+    if (digits.startsWith('90')) digits = digits.slice(2);
+    else if (digits.startsWith('0')) digits = digits.slice(1);
+    digits = digits.slice(0, 10);
 
-  const parts = [
-    digits.slice(0, 3),
-    digits.slice(3, 6),
-    digits.slice(6, 8),
-    digits.slice(8, 10),
-  ].filter(Boolean);
+    const parts = [
+      digits.slice(0, 3),
+      digits.slice(3, 6),
+      digits.slice(6, 8),
+      digits.slice(8, 10),
+    ].filter(Boolean);
 
-  return parts.length ? '+90 ' + parts.join(' ') : '';
-};
+    return parts.length ? '+90 ' + parts.join(' ') : '';
+  };
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
-  setForm({ ...form, [name]: name === 'phone' ? formatPhone(value) : value });
-};
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: name === 'phone' ? formatPhone(value) : value });
+  };
 
   const toggleDay = (day) =>
     setDays(days.includes(day) ? days.filter((d) => d !== day) : [...days, day]);
@@ -97,7 +100,7 @@ export default function UploadDocument() {
     if (!form.engineerCount || eng < 1)
       err.engineerCount = 'Mühendis sayısı en az 1 olmalı.';
     else if (eng < 5 && !form.engineerDepartment.trim())
-      err.engineerDepartment = 'Mühendis sayısı 5\'ten az: mezun olduğu bölümü yazın.';
+      err.engineerDepartment = "Mühendis sayısı 5'ten az: mezun olduğu bölümü yazın.";
 
     if (!file) err.file = 'Lütfen bir belge seçin.';
 
@@ -106,7 +109,6 @@ export default function UploadDocument() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSuccess('');
     const err = validate();
     setErrors(err);
     if (Object.keys(err).length > 0) return;
@@ -117,16 +119,13 @@ export default function UploadDocument() {
       data.append('file', file);
       data.append('info', JSON.stringify({ ...form, internshipDays: days }));
 
-      // GEÇİCİ MOCK: backend hazır olunca şunu aç:
-      // await api.post('/documents/upload', data);
+      // GEÇİCİ MOCK: backend hazır olunca şunu aç, mock satırlarını sil:
+      // const { data: res } = await api.post('/documents/upload', data);
       console.log('Gönderilecek:', file.name, form, days);
       await new Promise((r) => setTimeout(r, 800));
+      const res = { id: 2 };
 
-      setSuccess('Belge yüklendi. Durum: Yüklendi');
-      setForm(emptyForm);
-      setDays([]);
-      setFile(null);
-      e.target.reset();
+      navigate(`/student/report/${res.id}`);
     } catch (err) {
       setErrors({ general: err.response?.data?.message || 'Yükleme başarısız.' });
     } finally {
@@ -154,7 +153,6 @@ export default function UploadDocument() {
     <div className="container my-4" style={{ maxWidth: 800 }}>
       <h3 className="mb-4">Evrak Yükle</h3>
 
-      {success && <div className="alert alert-success">{success}</div>}
       {errors.general && <div className="alert alert-danger">{errors.general}</div>}
 
       <form onSubmit={handleSubmit}>
@@ -218,7 +216,10 @@ export default function UploadDocument() {
           <div className="card-header">3. Staj Bilgileri</div>
           <div className="card-body">
             <div className="row">
-              {field('semester', 'Öğretim Yılı / Yarıyıl', { placeholder: '2025-2026 Bahar', required: true })}
+              {field('semester', 'Öğretim Yılı / Yarıyıl', {
+                placeholder: '2025-2026 Bahar',
+                required: true,
+              })}
               <div className="col-md-6" />
               {field('startDate', 'Staj Başlangıç', { type: 'date', required: true })}
               {field('endDate', 'Staj Bitiş', { type: 'date', required: true })}
@@ -242,7 +243,11 @@ export default function UploadDocument() {
             </div>
 
             <div className="row">
-              {field('engineerCount', 'Firmadaki Mühendis Sayısı', { type: 'number', min: 0, required: true })}
+              {field('engineerCount', 'Firmadaki Mühendis Sayısı', {
+                type: 'number',
+                min: 0,
+                required: true,
+              })}
               {eng >= 1 && eng < 5 &&
                 field('engineerDepartment', 'Mühendis(ler)in mezun olduğu bölüm')}
             </div>
