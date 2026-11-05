@@ -92,4 +92,4 @@ public class AuthController : ControllerBase
             user.Email
         ));
     }
-}
+}   
